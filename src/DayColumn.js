@@ -195,53 +195,6 @@ class DayColumn extends React.Component {
       minimumStartDifference: Math.ceil((step * timeslots) / 2),
     })
 
-    /*
-      styledEvents = [{
-        top,
-        height,
-        width,
-        zOffset,
-      }]
-     */
-    /*
-      collisions = [{
-        y1,
-        y2,
-        cnt,
-      }]
-     */
-    // const collisions = []
-    // styledEvents.map(({ style }) => {
-    //   const start = style.top
-    //   const end = style.top + style.height
-    //   let head = collisions.find(c => c.y1 <= start && start <= c.y2)
-    //   let tail = collisions.find(c => c.y1 <= end && end <= c.y2)
-    //   if (head === undefined) {
-    //     head = {
-    //       y1: start,
-    //       y2: end,
-    //       cnt: 0,
-    //     }
-    //     collisions.push(head)
-    //   } else if (tail !== undefined && head !== tail) {
-    //     head.y2 = tail.y2
-    //     head.cnt += tail.cnt
-    //   }
-    //   head.y2 = Math.max(head.y2, end)
-    //   ++head.cnt
-    // })
-    //
-    // styledEvents = styledEvents.map(styleEvent => {
-    //   const c = collisions.find(c => {
-    //     const start = styleEvent.style.top
-    //     return c.y1 <= start && start <= c.y2
-    //   })
-    //   if (c.cnt > 1) {
-    //     styleEvent.style.width = 100 / c.cnt
-    //   }
-    //   return styleEvent
-    // })
-
     styledEvents.sort((a, b) => a.top > b.top ? 1 : -1)
 
     styledEvents.map((se) => {
@@ -289,8 +242,6 @@ class DayColumn extends React.Component {
       }
       se.style.left = positions[0]
     })
-
-    console.log('styledEvents', styledEvents)
 
     return styledEvents.map(({ event, style }, idx) => {
       let end = accessors.end(event)
