@@ -195,6 +195,103 @@ class DayColumn extends React.Component {
       minimumStartDifference: Math.ceil((step * timeslots) / 2),
     })
 
+    /*
+      styledEvents = [{
+        top,
+        height,
+        width,
+        zOffset,
+      }]
+     */
+    /*
+      collisions = [{
+        y1,
+        y2,
+        cnt,
+      }]
+     */
+    // const collisions = []
+    // styledEvents.map(({ style }) => {
+    //   const start = style.top
+    //   const end = style.top + style.height
+    //   let head = collisions.find(c => c.y1 <= start && start <= c.y2)
+    //   let tail = collisions.find(c => c.y1 <= end && end <= c.y2)
+    //   if (head === undefined) {
+    //     head = {
+    //       y1: start,
+    //       y2: end,
+    //       cnt: 0,
+    //     }
+    //     collisions.push(head)
+    //   } else if (tail !== undefined && head !== tail) {
+    //     head.y2 = tail.y2
+    //     head.cnt += tail.cnt
+    //   }
+    //   head.y2 = Math.max(head.y2, end)
+    //   ++head.cnt
+    // })
+    //
+    // styledEvents = styledEvents.map(styleEvent => {
+    //   const c = collisions.find(c => {
+    //     const start = styleEvent.style.top
+    //     return c.y1 <= start && start <= c.y2
+    //   })
+    //   if (c.cnt > 1) {
+    //     styleEvent.style.width = 100 / c.cnt
+    //   }
+    //   return styleEvent
+    // })
+
+    styledEvents.sort((a, b) => a.top > b.top ? 1 : -1)
+
+    styledEvents.map((se) => {
+      se.friends = []
+      delete se.style.width
+      delete se.style.left
+    })
+
+    for (let i=0; i<styledEvents.length; ++i) {
+      const se1 = styledEvents[i]
+      const y1 = se1.style.top
+      const y2 = se1.style.top + se1.style.height
+      for (let j=i+1; j<styledEvents.length; ++j) {
+        const se2 = styledEvents[j]
+        const y3 = se2.style.top
+        const y4 = se2.style.top + se2.style.height
+        // 두 이벤트가 겹칠때
+        if ((y3 <= y1 && y1 < y4)
+            || (y1 <= y3 && y3 < y2)) {
+          se1.friends.push(se2)
+          se2.friends.push(se1)
+        }
+      }
+      se1.style.width = 100 / (se1.friends.length + 1)
+    }
+
+    styledEvents.map((se) => {
+      let minWidth = 100;
+
+      se.friends.forEach((f) => minWidth = Math.min(minWidth, f.style.width))
+      se.style.width = minWidth
+
+      const positions = []
+      for (let i=0; i<100; i+=minWidth)
+        positions.push(i)
+      se.friends.forEach((f) => {
+        if (!f.style.hasOwnProperty('left'))
+          return
+        positions.splice(positions.indexOf(f.style.left), 1)
+      })
+
+      if (positions.length === 0) {
+        console.error('react-big-calendar', 'no positions...', 'se', se, 'minWidth', minWidth, 'positions', positions)
+        return
+      }
+      se.style.left = positions[0]
+    })
+
+    console.log('styledEvents', styledEvents)
+
     return styledEvents.map(({ event, style }, idx) => {
       let end = accessors.end(event)
       let start = accessors.start(event)
