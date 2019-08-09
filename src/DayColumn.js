@@ -195,10 +195,21 @@ class DayColumn extends React.Component {
       minimumStartDifference: Math.ceil((step * timeslots) / 2),
     })
 
-    styledEvents.sort((a, b) => a.top > b.top ? 1 : -1)
+    /**
+     * Cusotmization started
+     */
+    styledEvents.sort((a, b) => {
+      a = a.style
+      b = b.style
+      if (a.top !== b.top)
+        return a.top > b.top ? 1 : -1
+      else
+        return a.top + a.height < b.top + b.height ? 1 : -1
+    })
 
     styledEvents.map((se) => {
       se.friends = []
+      se.leader = false
       delete se.style.width
       delete se.style.left
     })
@@ -207,10 +218,12 @@ class DayColumn extends React.Component {
       const se1 = styledEvents[i]
       const y1 = se1.style.top
       const y2 = se1.style.top + se1.style.height
+
       for (let j=i+1; j<styledEvents.length; ++j) {
         const se2 = styledEvents[j]
         const y3 = se2.style.top
         const y4 = se2.style.top + se2.style.height
+
         // 두 이벤트가 겹칠때
         if ((y3 <= y1 && y1 < y4)
             || (y1 <= y3 && y3 < y2)) {
@@ -218,29 +231,58 @@ class DayColumn extends React.Component {
           se2.friends.push(se1)
         }
       }
-      se1.style.width = 100 / (se1.friends.length + 1)
     }
 
-    styledEvents.map((se) => {
-      let minWidth = 100;
-
-      se.friends.forEach((f) => minWidth = Math.min(minWidth, f.style.width))
-      se.style.width = minWidth
-
+    for (let i=0; i<styledEvents.length; ++i) {
+      const se = styledEvents[i]
       const positions = []
-      for (let i=0; i<100; i+=minWidth)
-        positions.push(i)
+      for (let j=0; j<100; ++j)
+        positions.push(j)
+
       se.friends.forEach((f) => {
-        if (!f.style.hasOwnProperty('left'))
-          return
+        if (!f.style.hasOwnProperty('left')) return
         positions.splice(positions.indexOf(f.style.left), 1)
       })
 
-      if (positions.length === 0) {
-        console.error('react-big-calendar', 'no positions...', 'se', se, 'minWidth', minWidth, 'positions', positions)
-        return
-      }
       se.style.left = positions[0]
+    }
+
+    styledEvents.map((se) => {
+      let width = 0
+      let maxLeft = 0
+
+      if (se.style.hasOwnProperty('width')) return
+
+      function dfs(node, maxLeft, visited) {
+        node.friends.forEach((f) => {
+          if (visited.indexOf(f) > -1) return
+          maxLeft = Math.max(maxLeft, f.style.left)
+          visited.push(f)
+          maxLeft = Math.max(maxLeft, dfs(f, maxLeft, visited))
+        })
+        return maxLeft
+      }
+
+      const allFriends = []
+      maxLeft = dfs(se, 0, allFriends)
+      width = 100 / (maxLeft + 1)
+      se.style.width = width
+
+      allFriends.map((f) => f.style.width = width)
+
+      return se
+    })
+
+    styledEvents.map((se) => {
+      let originWidth = se.style.width
+
+      // stretch to maximum
+      let maxLeft = 0
+      se.friends.forEach((f) => maxLeft = Math.max(maxLeft, f.style.left))
+      if (maxLeft <= se.style.left)
+        se.style.width = 100 - (se.style.left * se.style.width)
+
+      se.style.left *= originWidth
     })
 
     return styledEvents.map(({ event, style }, idx) => {
