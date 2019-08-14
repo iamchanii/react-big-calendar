@@ -266,14 +266,7 @@ class DayColumn extends React.Component {
       const allFriends = []
       maxLeft = dfs(se, 0, allFriends)
       width = 100 / (maxLeft + 1)
-
-      // padding between events
-      // for this feature, `width` is not percentage based unit anymore
-      // it will be used with calc()
-      let padding = 0
-      if (width < 100) // not first child
-          padding = 6
-      se.style.width = `calc(${width}% - ${padding}px)`
+      se.style.width = width
 
       allFriends.map((f) => f.style.width = width)
 
@@ -288,6 +281,13 @@ class DayColumn extends React.Component {
       se.friends.forEach((f) => maxLeft = Math.max(maxLeft, f.style.left))
       if (maxLeft <= se.style.left)
         se.style.width = 100 - (se.style.left * se.style.width)
+
+      // padding between events
+      // for this feature, `width` is not percentage based unit anymore
+      // it will be used with calc()
+      const padding = se.style.left === 0 ? 0 : 2
+      se.style.width = `calc(${se.style.width}% - ${padding}px)`
+      se.style.marginLeft = padding
 
       se.style.left *= originWidth
     })
