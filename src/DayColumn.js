@@ -285,7 +285,7 @@ class DayColumn extends React.Component {
       // padding between events
       // for this feature, `width` is not percentage based unit anymore
       // it will be used with calc()
-      const padding = se.style.left === 0 ? 0 : 2
+      const padding = se.style.left === 0 ? 0 : 3
       se.style.width = `calc(${se.style.width}% - ${padding}px)`
       se.style.marginLeft = padding
 
