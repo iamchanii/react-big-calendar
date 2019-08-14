@@ -43,7 +43,7 @@ function TimeGridEvent(props) {
         style={{
           ...userProps.style,
           top: `${top}%`,
-          height: `${height}%`,
+          height: `calc(${height}% - 2px)`,
           [rtl ? 'right' : 'left']: `${Math.max(0, xOffset)}%`,
           width: `${width}`,
           marginLeft: `${marginLeft}px`,
