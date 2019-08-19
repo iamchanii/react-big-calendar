@@ -1,5 +1,6 @@
 import cn from 'classnames'
 import React from 'react'
+import NoopWrapper from '../lib/NoopWrapper'
 
 /* eslint-disable react/prop-types */
 function TimeGridEvent(props) {
@@ -16,7 +17,7 @@ function TimeGridEvent(props) {
     getters,
     onClick,
     onDoubleClick,
-    components: { event: Event, eventWrapper: EventWrapper },
+    components: { event: Event, eventWrapper: EventWrapper, eventInnerWrapper: EventInnerWrapper = NoopWrapper },
   } = props
   let title = accessors.title(event)
   let tooltip = accessors.tooltip(event)
@@ -37,7 +38,7 @@ function TimeGridEvent(props) {
 
   return (
     <EventWrapper type="time" {...props}>
-      <div
+      <EventInnerWrapper
         onClick={onClick}
         onDoubleClick={onDoubleClick}
         style={{
@@ -61,7 +62,7 @@ function TimeGridEvent(props) {
         })}
       >
         {inner}
-      </div>
+      </EventInnerWrapper>
     </EventWrapper>
   )
 }

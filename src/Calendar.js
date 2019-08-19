@@ -670,6 +670,7 @@ class Calendar extends React.Component {
      */
     components: PropTypes.shape({
       event: PropTypes.elementType,
+      eventInnerWrapper: PropTypes.elementType,
       eventWrapper: PropTypes.elementType,
       eventContainerWrapper: PropTypes.elementType,
       dateCellWrapper: PropTypes.elementType,
@@ -788,6 +789,7 @@ class Calendar extends React.Component {
         dayProp: (...args) => (dayPropGetter && dayPropGetter(...args)) || {},
       },
       components: defaults(components[view] || {}, omit(components, names), {
+        eventInnerWrapper: NoopWrapper,
         eventWrapper: NoopWrapper,
         eventContainerWrapper: NoopWrapper,
         dateCellWrapper: NoopWrapper,
