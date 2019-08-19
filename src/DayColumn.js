@@ -196,7 +196,7 @@ class DayColumn extends React.Component {
     })
 
     /**
-     * Cusotmization started
+     * Cusotmization starts
      */
     styledEvents.sort((a, b) => {
       a = a.style
@@ -209,9 +209,10 @@ class DayColumn extends React.Component {
 
     styledEvents.map((se) => {
       se.friends = []
-      se.leader = false
-      delete se.style.width
       delete se.style.left
+      delete se.style.width
+      delete se.idx // virtual left
+      delete se.size // virtual width
     })
 
     for (let i=0; i<styledEvents.length; ++i) {
@@ -235,61 +236,59 @@ class DayColumn extends React.Component {
 
     for (let i=0; i<styledEvents.length; ++i) {
       const se = styledEvents[i]
-      const positions = []
+      const bitmap = []
       for (let j=0; j<100; ++j)
-        positions.push(j)
+        bitmap.push(1); // 1 means available
 
       se.friends.forEach((f) => {
-        if (!f.style.hasOwnProperty('left')) return
-        positions.splice(positions.indexOf(f.style.left), 1)
+        const idx = f.idx
+        if (idx === undefined) return
+        bitmap[idx] = 0 // 0 means reserved
       })
 
-      se.style.left = positions[0]
+      se.idx = bitmap.indexOf(1)
+    }
+
+    function dfs(node, maxIdx, visited) {
+      node.friends.forEach((f) => {
+        if (visited.indexOf(f) > -1) return
+        maxIdx = Math.max(maxIdx, f.idx)
+        visited.push(f)
+        maxIdx = Math.max(maxIdx, dfs(f, maxIdx, visited))
+      })
+      return maxIdx
     }
 
     styledEvents.map((se) => {
-      let width = 0
-      let maxLeft = 0
+      let size = 0
+      let maxIdx = 0
 
-      if (se.style.hasOwnProperty('width')) return
-
-      function dfs(node, maxLeft, visited) {
-        node.friends.forEach((f) => {
-          if (visited.indexOf(f) > -1) return
-          maxLeft = Math.max(maxLeft, f.style.left)
-          visited.push(f)
-          maxLeft = Math.max(maxLeft, dfs(f, maxLeft, visited))
-        })
-        return maxLeft
-      }
+      if (se.size) return
 
       const allFriends = []
-      maxLeft = dfs(se, 0, allFriends)
-      width = 100 / (maxLeft + 1)
-      se.style.width = width
+      maxIdx = dfs(se, 0, allFriends)
+      size = 100 / (maxIdx + 1)
+      se.size = size
 
-      allFriends.map((f) => f.style.width = width)
-
-      return se
+      allFriends.map((f) => f.size = size)
     })
 
     styledEvents.map((se) => {
-      let originWidth = se.style.width
+      se.style.left = se.idx * se.size
 
       // stretch to maximum
-      let maxLeft = 0
-      se.friends.forEach((f) => maxLeft = Math.max(maxLeft, f.style.left))
-      if (maxLeft <= se.style.left)
-        se.style.width = 100 - (se.style.left * se.style.width)
+      let maxIdx = 0
+      se.friends.forEach((f) => maxIdx = Math.max(maxIdx, f.idx))
+      if (maxIdx <= se.idx) {
+        se.size = 100 - (se.idx * se.size)
+      }
 
       // padding between events
       // for this feature, `width` is not percentage based unit anymore
       // it will be used with calc()
-      const padding = se.style.left === 0 ? 0 : 3
-      se.style.width = `calc(${se.style.width}% - ${padding}px)`
+      const padding = se.idx === 0 ? 0 : 3
+      se.style.width = `calc(${se.size}% - ${padding}px)`
       se.style.marginLeft = padding
-
-      se.style.left *= originWidth
     })
 
     return styledEvents.map(({ event, style }, idx) => {
