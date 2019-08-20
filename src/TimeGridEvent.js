@@ -60,6 +60,7 @@ function TimeGridEvent(props) {
           'rbc-event-continues-earlier': continuesEarlier,
           'rbc-event-continues-later': continuesLater,
         })}
+        event={event}
       >
         {inner}
       </EventInnerWrapper>
