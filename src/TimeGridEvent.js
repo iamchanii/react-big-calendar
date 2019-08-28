@@ -3,7 +3,7 @@ import React from 'react'
 import NoopWrapper from '../lib/NoopWrapper'
 
 /* eslint-disable react/prop-types */
-function TimeGridEvent(props) {
+function TimeGridEvent(props, ref) {
   const {
     style,
     className,
@@ -17,7 +17,11 @@ function TimeGridEvent(props) {
     getters,
     onClick,
     onDoubleClick,
-    components: { event: Event, eventWrapper: EventWrapper, eventInnerWrapper: EventInnerWrapper = NoopWrapper },
+    components: {
+      event: Event,
+      eventWrapper: EventWrapper,
+      eventInnerWrapper: EventInnerWrapper = NoopWrapper,
+    },
   } = props
   let title = accessors.title(event)
   let tooltip = accessors.tooltip(event)
@@ -39,6 +43,7 @@ function TimeGridEvent(props) {
   return (
     <EventWrapper type="time" {...props}>
       <EventInnerWrapper
+        ref={ref}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
         style={{
@@ -68,4 +73,4 @@ function TimeGridEvent(props) {
   )
 }
 
-export default TimeGridEvent
+export default React.forwardRef(TimeGridEvent)
